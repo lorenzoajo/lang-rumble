@@ -1,0 +1,39 @@
+{
+  "v": 1,
+  "base": "it",
+  "target": "es",
+  "deck": [
+    { "id": "casa", "rank": 1, "target": ["casa", "hogar"], "base": ["casa"] },
+    {
+      "id": "estar",
+      "rank": 2,
+      "target": ["estar"],
+      "base": ["essere", "stare"],
+      "phrase": {
+        "target": { "text": "Estaba aquí.", "gap": "estaba", "hint": "Ero qui." },
+        "base": { "text": "Devo stare qui.", "gap": "stare", "hint": "Tengo que estar aquí." }
+      }
+    },
+    { "id": "hogar", "rank": 3, "target": ["hogar", "casa"], "base": ["casa", "focolare"] },
+    { "id": "perro", "rank": 4, "target": ["perro"], "base": ["cane"] },
+    { "id": "gato", "rank": 5, "target": ["gato"], "base": ["gatto"] }
+  ],
+  "lexicon": {
+    "target": {
+      "casa": { "tr": ["casa"], "def": "edificio destinato all'abitazione" },
+      "estar": { "tr": ["essere", "stare"], "def": "esistere, trovarsi" },
+      "estaba": { "tr": ["essere", "stare"], "def": "esistere, trovarsi" },
+      "hogar": { "tr": ["casa", "focolare"], "def": "edificio destinato all'abitazione" },
+      "perro": { "tr": ["cane"], "def": "animale domestico" },
+      "gato": { "tr": ["gatto"], "def": null },
+      "ser": { "tr": ["essere"], "def": "esistere" }
+    },
+    "base": {
+      "casa": { "tr": ["casa", "hogar"], "def": "edificio destinato all'abitazione" },
+      "cane": { "tr": ["perro"], "def": "animale domestico" },
+      "gatto": { "tr": ["gato"], "def": "felino domestico" },
+      "stare": { "tr": ["estar"], "def": "trovarsi" },
+      "essere": { "tr": ["ser", "estar"], "def": "esistere" }
+    }
+  }
+}
