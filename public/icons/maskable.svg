@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#6d28d9"/>
+  <g transform="translate(76 76) scale(0.703)">
+    <rect x="76" y="76" width="168" height="168" rx="36" fill="#ff5d73"/>
+    <rect x="268" y="76" width="168" height="168" rx="36" fill="#ffcc33"/>
+    <rect x="76" y="268" width="168" height="168" rx="36" fill="#2fa8ff"/>
+    <rect x="268" y="268" width="168" height="168" rx="36" fill="#20c997"/>
+    <g font-family="Arial Rounded MT Bold, Arial, sans-serif" font-weight="900" font-size="150" text-anchor="middle">
+      <text x="160" y="212" fill="#fff">L</text>
+      <text x="352" y="212" fill="#2a1a4a">R</text>
+      <text x="160" y="404" fill="#fff">U</text>
+      <text x="352" y="404" fill="#fff">M</text>
+    </g>
+  </g>
+</svg>
