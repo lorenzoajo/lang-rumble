@@ -30,21 +30,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // The app shell, the manifest and the dictionaries are precached; pair files (~1.5 MB each)
-        // are cached on first use so installing doesn't download every language.
-        globPatterns: [
-          '**/*.{js,css,html,svg,png,webmanifest}',
-          'data/manifest.json',
-          'data/dict-*.json',
-        ],
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) =>
-              url.pathname.includes('/data/') && url.pathname.endsWith('.json'),
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'word-data', expiration: { maxEntries: 32 } },
-          },
-        ],
+        // Everything, word data included (~12 MB), is precached at install so every language
+        // works offline from the first visit.
+        globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}', 'data/*.json'],
+        // Pair files are ~1.3–1.7 MB; workbox skips anything over 2 MB by default.
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
     }),
   ],
