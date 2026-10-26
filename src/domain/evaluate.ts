@@ -9,6 +9,10 @@ export interface Reveal {
   translations: string[]
   definition: string | null
   lemma: string | null
+  /** other answers that would also have been correct */
+  alternatives: string[]
+  /** a wrong word that is the base form of the inflected phrase gap */
+  baseForm: boolean
 }
 
 export type Evaluation =
@@ -41,13 +45,29 @@ export function evaluate(raw: string, prompt: Prompt, pair: LoadedPair): Evaluat
     const lemma = prompt.mode === 'phrase-to-target' && word !== entry.id ? entry.id : null
     return {
       kind: 'correct',
-      reveal: { word, side, correct: true, lemma, ...describe(word, side, pair, fallback) },
+      reveal: {
+        word,
+        side,
+        correct: true,
+        lemma,
+        alternatives: prompt.accepted.filter((w) => w !== word),
+        baseForm: false,
+        ...describe(word, side, pair, fallback),
+      },
     }
   }
   if (pair.dict[side].has(word) || pair.data.lexicon[side][word]) {
     return {
       kind: 'wrong-real',
-      reveal: { word, side, correct: false, lemma: null, ...describe(word, side, pair, []) },
+      reveal: {
+        word,
+        side,
+        correct: false,
+        lemma: null,
+        alternatives: [],
+        baseForm: prompt.mode === 'phrase-to-target' && word === entry.id,
+        ...describe(word, side, pair, []),
+      },
     }
   }
   return { kind: 'invalid' }

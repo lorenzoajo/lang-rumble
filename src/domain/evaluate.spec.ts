@@ -29,10 +29,20 @@ describe('evaluate', () => {
     expect(r.kind).toBe('correct')
     if (r.kind === 'correct') expect(r.reveal.lemma).toBe('estar')
   })
-  it('treats the lemma as a real but wrong word when the gap is inflected', () => {
-    expect(evaluate('estar', buildPrompt(entry('estar'), 'phrase-to-target'), pair).kind).toBe(
-      'wrong-real',
-    )
+  it('treats the lemma as a real but wrong word and flags it as the base form', () => {
+    const r = evaluate('estar', buildPrompt(entry('estar'), 'phrase-to-target'), pair)
+    expect(r.kind).toBe('wrong-real')
+    if (r.kind === 'wrong-real') expect(r.reveal.baseForm).toBe(true)
+  })
+  it('does not flag unrelated wrong words as the base form', () => {
+    const r = evaluate('perro', buildPrompt(entry('estar'), 'phrase-to-target'), pair)
+    if (r.kind !== 'wrong-real') throw new Error('expected wrong-real')
+    expect(r.reveal.baseForm).toBe(false)
+  })
+  it('lists the other accepted answers on a correct answer', () => {
+    const r = evaluate('casa', buildPrompt(entry('casa'), 'word-to-target'), pair)
+    if (r.kind !== 'correct') throw new Error('expected correct')
+    expect(r.reveal.alternatives).toEqual(['hogar'])
   })
   it('explains a real but wrong word', () => {
     const r = evaluate('perro', buildPrompt(entry('casa'), 'word-to-target'), pair)

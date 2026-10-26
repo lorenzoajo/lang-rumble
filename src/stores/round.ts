@@ -32,6 +32,8 @@ export const useRoundStore = defineStore('round', () => {
   let frame = 0
   let lastWholeSecond = 0
   let onEnd: (() => void) | null = null
+  // Bumped by stop(); a start() whose load resolves after the screen was left is dropped.
+  let generation = 0
 
   function tick(): void {
     const r = round.value
@@ -50,6 +52,7 @@ export const useRoundStore = defineStore('round', () => {
 
   async function start(m: Mode, ended: () => void): Promise<void> {
     stop()
+    const token = generation
     const app = useAppStore()
     const { base, activeTarget } = app.state.settings
     if (!activeTarget || !app.activePair) return
@@ -57,6 +60,7 @@ export const useRoundStore = defineStore('round', () => {
     error.value = null
     try {
       const loaded = await loadPair(base, activeTarget)
+      if (token !== generation) return
       const r = reactive(
         new Round({
           pair: loaded,
@@ -81,8 +85,11 @@ export const useRoundStore = defineStore('round', () => {
     }
   }
 
-  /** Commits progress, stores the summary and notifies the view. Safe to call more than once. */
-  function end(): void {
+  /**
+   * Commits progress and stores the summary. Safe to call more than once. With `navigate: false`
+   * (the user is leaving the play screen) the view is not sent to the results.
+   */
+  function end({ navigate = true }: { navigate?: boolean } = {}): void {
     const r = round.value
     if (!r || !pair || !mode) return
     cancelAnimationFrame(frame)
@@ -98,13 +105,17 @@ export const useRoundStore = defineStore('round', () => {
       newlyMastered: [...r.state.newlyMastered],
     }
     round.value = null
-    sfx.play('end')
-    onEnd?.()
+    const notify = onEnd
     onEnd = null
+    if (navigate) {
+      sfx.play('end')
+      notify?.()
+    }
   }
 
-  /** Drops the round without saving (leaving the play screen mid-round still saves via end()). */
+  /** Drops the round (or a pending start) without saving. */
   function stop(): void {
+    generation++
     cancelAnimationFrame(frame)
     round.value = null
     onEnd = null

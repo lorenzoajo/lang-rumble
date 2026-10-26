@@ -86,6 +86,27 @@ describe('Round answers', () => {
   })
 })
 
+describe('Round wall clock', () => {
+  it('stamps word stats with the wall clock, not the page clock', () => {
+    const progress = emptyProgress()
+    let t = 5_000
+    const round = new Round({
+      pair,
+      mode: 'word-to-target',
+      progress,
+      now: () => t,
+      clock: () => 1_700_000_000_000,
+      rng: mulberry32(1),
+    })
+    round.start()
+    const id = round.state.prompt!.entry.id
+    t += 1_000
+    round.submit(round.state.prompt!.accepted[0]!)
+    round.applyTo(progress)
+    expect(progress.words[id]?.production?.lastSeen).toBe(1_700_000_000_000)
+  })
+})
+
 describe('Round progress', () => {
   it('resets the streak on skip and drops the word to box 0', () => {
     const progress = emptyProgress()

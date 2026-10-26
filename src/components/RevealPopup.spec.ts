@@ -10,6 +10,8 @@ const reveal = (correct: boolean): Reveal => ({
   translations: ['cane'],
   definition: 'animale domestico',
   lemma: null,
+  alternatives: [],
+  baseForm: false,
 })
 
 describe('RevealPopup', () => {

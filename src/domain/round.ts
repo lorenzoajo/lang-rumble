@@ -18,7 +18,10 @@ export interface RoundDeps {
   pair: LoadedPair
   mode: Mode
   progress: PairProgress
+  /** monotonic clock for round timing */
   now: () => number
+  /** wall clock for persisted timestamps; defaults to Date.now */
+  clock?: () => number
   rng: () => number
 }
 
@@ -83,6 +86,10 @@ export class Round {
       return n >= DECOY_MIN && n <= DECOY_MAX
     })
     this.letterFreq = letterFrequencies(words.slice(0, FREQ_SAMPLE))
+  }
+
+  private wallNow(): number {
+    return (this.deps.clock ?? Date.now)()
   }
 
   start(): void {
@@ -182,7 +189,7 @@ export class Round {
 
   private record(id: string, result: 'correct' | 'skip' | 'seen'): void {
     const before = this.stats[id]
-    const after = applyResult(before, result, this.deps.now())
+    const after = applyResult(before, result, this.wallNow())
     this.stats[id] = after
     this.touched.add(id)
     this.resolved = true
@@ -199,7 +206,7 @@ export class Round {
     if (this.state.over) return
     const stats: PairProgress['words'] = {}
     for (const [id, stat] of Object.entries(this.stats)) if (stat) stats[id] = { [this.dir]: stat }
-    const now = this.deps.now()
+    const now = this.wallNow()
     const exclude = new Set(this.recent.slice(-Math.min(RECENT_PROMPTS, this.pool.length - 1)))
     const entry = pickNext(this.pool, stats, this.dir, now, this.deps.rng, exclude)
     if (!entry) {

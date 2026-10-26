@@ -99,8 +99,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('visibilitychange', onVisibility)
-  // Leaving mid-round still saves what was played.
-  if (rounds.round) rounds.end()
+  // Leaving mid-round saves what was played without hijacking the navigation;
+  // leaving while the pair is still loading cancels the start.
+  if (rounds.round) rounds.end({ navigate: false })
+  else rounds.stop()
 })
 </script>
 

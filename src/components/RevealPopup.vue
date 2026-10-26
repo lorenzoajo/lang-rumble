@@ -22,7 +22,9 @@ const translations = computed(() => props.reveal.translations.join(', '))
         <span class="popup__icon" aria-hidden="true">{{ reveal.correct ? '✓' : '✗' }}</span>
         <h2>{{ reveal.correct ? t('reveal.correct') : t('reveal.wrong') }}</h2>
       </header>
-      <p v-if="!reveal.correct" class="popup__hint">{{ t('reveal.wrongHint') }}</p>
+      <p v-if="!reveal.correct" class="popup__hint">
+        {{ reveal.baseForm ? t('reveal.baseForm') : t('reveal.wrongHint') }}
+      </p>
 
       <p class="popup__word">{{ reveal.word }}</p>
       <p v-if="reveal.lemma" class="popup__lemma">
@@ -33,6 +35,10 @@ const translations = computed(() => props.reveal.translations.join(', '))
         <template v-if="translations">
           <dt>{{ t('reveal.translations') }}</dt>
           <dd class="popup__tr">{{ translations }}</dd>
+        </template>
+        <template v-if="reveal.alternatives.length">
+          <dt>{{ t('reveal.alternatives') }}</dt>
+          <dd>{{ reveal.alternatives.join(', ') }}</dd>
         </template>
         <dt>{{ t('reveal.definition') }}</dt>
         <dd>{{ reveal.definition ?? t('reveal.noDefinition') }}</dd>
