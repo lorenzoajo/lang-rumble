@@ -154,3 +154,7 @@ devenv.local.nix
 devenv.local.yaml
 .direnv
 .pre-commit-config.yaml
+
+# local data pipeline cache / agent workspace
+.data-cache/
+.superpowers/

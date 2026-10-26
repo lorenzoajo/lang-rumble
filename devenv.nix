@@ -5,6 +5,7 @@
     git
     gh
     jq
+    bzip2
     vue-language-server
     typescript-language-server
   ];
