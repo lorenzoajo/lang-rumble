@@ -1,5 +1,12 @@
 import type { BaseLang, LangCode } from '../../src/domain/types'
-import { cleanGloss, glossTokens, isPlayableWord, type Edition, type LexRecord } from './wiktionary'
+import {
+  cleanGloss,
+  glossTokens,
+  isPlayableWord,
+  rawGlossParts,
+  type Edition,
+  type LexRecord,
+} from './wiktionary'
 
 export interface LexIndex {
   records: Map<string, LexRecord[]>
@@ -38,8 +45,9 @@ export function buildIndex(records: Iterable<LexRecord>): LexIndex {
       idx.words.set(r.lang, set)
     }
     if (r.lang === r.edition) {
-      for (const t of r.translations) {
-        push(idx.reverseTranslations, key(r.edition, t.lang, t.word.toLowerCase()), r.word)
+      for (const lang of new Set(r.translations.map((t) => t.lang))) {
+        for (const w of firstSenseTranslations([r], lang))
+          push(idx.reverseTranslations, key(r.edition, lang, w), r.word)
       }
     } else {
       for (const g of r.glosses.slice(0, 2)) {
@@ -81,7 +89,17 @@ function firstSenseTranslations(records: LexRecord[], lang: LangCode): string[] 
 }
 
 function finish(candidates: string[], accept: (w: string) => boolean): string[] {
-  return [...new Set(candidates)].filter(accept).slice(0, MAX)
+  return [...new Set(candidates)].filter((w) => isPlayableWord(w) && accept(w)).slice(0, MAX)
+}
+
+/**
+ * A word's own gloss is authoritative: when it exists but cannot be played (de "und" → it "e"),
+ * the word is skipped rather than filled from noisier sources.
+ */
+function fromOwnGloss(records: LexRecord[], accept: (w: string) => boolean): string[] | null {
+  const glosses = records.flatMap((r) => r.glosses).slice(0, 2)
+  if (!glosses.some((g) => rawGlossParts(g).length)) return null
+  return finish(glosses.flatMap(glossTokens), accept)
 }
 
 export function baseTranslations(
@@ -91,17 +109,33 @@ export function baseTranslations(
   lemma: string,
 ): string[] {
   const known = (w: string): boolean => hasWord(idx, base, w)
-  const fromGloss = firstGlossTokens(recordsOf(idx, base, target, lemma), 2)
-  const fromTables = idx.reverseTranslations.get(key(base, target, lemma)) ?? []
-  const direct = finish([...fromGloss, ...fromTables], known)
-  if (direct.length || base === 'en' || target === 'en') return direct
-  const english = firstGlossTokens(recordsOf(idx, 'en', target, lemma), 1).slice(0, 1)
-  const pivot = english.flatMap((w) => firstSenseTranslations(recordsOf(idx, 'en', 'en', w), base))
-  return finish(pivot, known)
+  const own = fromOwnGloss(recordsOf(idx, base, target, lemma), known)
+  if (own) return own
+  if (base === 'it') {
+    const english =
+      target === 'en'
+        ? [lemma]
+        : firstGlossTokens(recordsOf(idx, 'en', target, lemma), 1).slice(0, 1)
+    const pivot = finish(
+      english.flatMap((w) => firstSenseTranslations(recordsOf(idx, 'en', 'en', w), base)),
+      known,
+    )
+    if (pivot.length) return pivot
+  }
+  return finish(idx.reverseTranslations.get(key(base, target, lemma)) ?? [], known)
 }
 
-export function baseDefinition(idx: LexIndex, base: BaseLang, word: string): string | null {
-  for (const r of recordsOf(idx, base, base, word)) {
+export function baseDefinition(
+  idx: LexIndex,
+  base: BaseLang,
+  word: string,
+  pos?: string,
+): string | null {
+  const records = recordsOf(idx, base, base, word)
+  const ordered = pos
+    ? [...records.filter((r) => r.pos === pos), ...records.filter((r) => r.pos !== pos)]
+    : records
+  for (const r of ordered) {
     for (const g of r.glosses) {
       const cleaned = cleanGloss(g, word)
       if (cleaned) return cleaned
@@ -128,4 +162,15 @@ export function targetTranslations(
     .slice(0, 1)
     .flatMap((w) => firstSenseTranslations(recordsOf(idx, 'en', 'en', w), target))
   return finish(pivot, known)
+}
+
+/** Part of speech of the first record for a word, preferring the given edition. */
+export function primaryPos(
+  idx: LexIndex,
+  edition: Edition,
+  lang: LangCode,
+  word: string,
+): string | undefined {
+  const other: Edition = edition === 'it' ? 'en' : 'it'
+  return (recordsOf(idx, edition, lang, word)[0] ?? recordsOf(idx, other, lang, word)[0])?.pos
 }

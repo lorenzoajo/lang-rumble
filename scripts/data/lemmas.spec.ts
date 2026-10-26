@@ -39,4 +39,19 @@ describe('rankLemmas', () => {
     )
     expect(r.map((x) => x.lemma)).toEqual(['estar', 'casa'])
   })
+  it('maps a frequent form to a top lemma even if the form is also a lemma', () => {
+    // fr "est" is both a noun (east) and the 3rd person of "être"
+    const f = new Map([['est', ['être']]])
+    const k = new Set(['est', 'être'])
+    const r = rankLemmas(
+      [
+        ['est', 100],
+        ['être', 20],
+      ],
+      f,
+      k,
+      new Set(['être']),
+    )
+    expect(r).toEqual([{ lemma: 'être', count: 120, forms: ['est', 'être'] }])
+  })
 })

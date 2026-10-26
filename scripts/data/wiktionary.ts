@@ -46,7 +46,7 @@ const DROPPED_POS = new Set([
   'punct',
   'romanization',
 ])
-const STUB_GLOSS = /^\S+\s*\(\s*(approfondimento|citazioni)/i
+const STUB_GLOSS = /^\S+\s*\(\s*(approfondimento|citazioni)|definizione mancante/i
 const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' })
 
 function isLang(code: string | undefined): code is LangCode {
@@ -122,5 +122,14 @@ export function glossTokens(gloss: string): string[] {
         .replace(/^to\s+/, '')
         .replace(/[.:!?]+$/, ''),
     )
-    .filter(isPlayableWord)
+    .filter((token) => token !== 'etc' && isPlayableWord(token))
+}
+
+/** Like glossTokens but keeps unplayable parts, to tell "no gloss" apart from "gloss we cannot play". */
+export function rawGlossParts(gloss: string): string[] {
+  if (STUB_GLOSS.test(gloss)) return []
+  return stripParentheticals(gloss)
+    .split(/[,;]/)
+    .map((part) => part.trim())
+    .filter(Boolean)
 }

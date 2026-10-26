@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { cleanGloss, isPlayableWord, parseRecord } from './wiktionary'
+import { cleanGloss, glossTokens, isPlayableWord, parseRecord } from './wiktionary'
 import { fixtureLines } from './fixtures/load'
 
 const line = (edition: 'it' | 'en', word: string, lang: string, pos?: string): string => {
@@ -42,6 +42,9 @@ describe('cleanGloss', () => {
       "edificio all'abitazione",
     )
   })
+  it('rejects the italian wiktionary missing-definition placeholder', () => {
+    expect(cleanGloss('definizione mancante; se vuoi, aggiungila tu', 'proibito')).toBeNull()
+  })
   it('rejects glosses equal to the word', () => {
     expect(cleanGloss('Casa', 'casa')).toBeNull()
   })
@@ -57,5 +60,12 @@ describe('isPlayableWord', () => {
     ['abcdefghijklm', false],
   ])('%s → %s', (word, expected) => {
     expect(isPlayableWord(word)).toBe(expected)
+  })
+})
+
+describe('glossTokens', () => {
+  it('drops etc and placeholder glosses', () => {
+    expect(glossTokens('the, my, your, etc.')).toEqual(['the', 'my', 'your'])
+    expect(glossTokens('definizione mancante; se vuoi, aggiungila tu')).toEqual([])
   })
 })

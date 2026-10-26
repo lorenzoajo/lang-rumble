@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "vue-tsc --noEmit",
-    "data": "tsx scripts/data/build.ts"
+    "data": "NODE_OPTIONS=--max-old-space-size=6144 tsx scripts/data/build.ts"
   },
   "dependencies": {
     "pinia": "^4.1.0",
