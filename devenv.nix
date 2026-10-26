@@ -27,11 +27,17 @@
     dev.exec = "pnpm dev";
     build.exec = "pnpm build";
     preview.exec = "pnpm preview";
+    test.exec = "pnpm test";
+    data.exec = "pnpm data";
   };
 
   git-hooks.hooks.prettier = {
     enable = true;
-    excludes = [ "\\.md$" ];
+    excludes = [
+      "\\.md$"
+      "pnpm-lock\\.yaml$"
+      "^public/data/"
+    ];
   };
 
   enterShell = ''
