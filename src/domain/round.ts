@@ -161,12 +161,17 @@ export class Round {
     this.nextPrompt()
   }
 
-  skip(): void {
+  /** Gives up on the prompt: no points, streak lost, and the solution is returned for the popup. */
+  skip(): Reveal | null {
     const prompt = this.state.prompt
-    if (!prompt || this.state.over) return
+    if (!prompt || this.state.over || this.state.paused) return null
     this.state.streak = 0
     this.record(prompt.entry.id, 'skip')
-    this.nextPrompt()
+    this.pause()
+    const answer = prompt.accepted[0] ?? prompt.entry.id
+    const evaluation = evaluate(answer, prompt, this.deps.pair)
+    if (evaluation.kind === 'invalid') return null
+    return { ...evaluation.reveal, correct: false, skipped: true }
   }
 
   applyTo(progress: PairProgress): void {

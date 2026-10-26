@@ -57,16 +57,18 @@ function onSubmit(word: string): void {
 
 function closeReveal(): void {
   const r = round.value
-  const wasCorrect = reveal.value?.correct ?? false
+  const advance = (reveal.value?.correct || reveal.value?.skipped) ?? false
   reveal.value = null
   if (!r) return
-  if (wasCorrect) r.next()
+  if (advance) r.next()
   else r.resume()
 }
 
 function skip(): void {
+  const solution = round.value?.skip()
+  if (!solution) return
   sfx.play('tap')
-  round.value?.skip()
+  reveal.value = solution
 }
 
 function pause(): void {

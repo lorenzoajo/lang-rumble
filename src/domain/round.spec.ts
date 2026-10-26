@@ -108,6 +108,30 @@ describe('Round wall clock', () => {
   })
 })
 
+describe('Round skip', () => {
+  it('reveals the answer without points and pauses until next()', () => {
+    const { round, clock } = setup()
+    const prompt = round.state.prompt!
+    const reveal = round.skip()
+    expect(reveal).toMatchObject({ word: prompt.accepted[0], skipped: true, correct: false })
+    expect(reveal?.definition).toMatch(/abitazione/)
+    expect(round.state.score).toBe(0)
+    expect(round.state.paused).toBe(true)
+    const left = round.remainingMs()
+    clock.advance(10_000)
+    expect(round.remainingMs()).toBe(left)
+    expect(round.state.prompt).toBe(prompt)
+    round.next()
+    expect(round.state.paused).toBe(false)
+    expect(round.state.prompt!.entry.id).not.toBe(prompt.entry.id)
+  })
+  it('ignores a second skip while the answer is shown', () => {
+    const { round } = setup()
+    round.skip()
+    expect(round.skip()).toBeNull()
+  })
+})
+
 describe('Round edge cases', () => {
   it('keeps playing a single-word pool', () => {
     const one: LoadedPair = { ...pair, data: { ...data, deck: data.deck.slice(0, 1) } }
@@ -135,6 +159,7 @@ describe('Round progress', () => {
     round.next()
     const skipped = round.state.prompt!.entry.id
     round.skip()
+    round.next()
     expect(round.state.streak).toBe(0)
     round.applyTo(progress)
     expect(progress.words[skipped]?.production?.box).toBe(0)

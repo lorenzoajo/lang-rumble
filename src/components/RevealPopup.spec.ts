@@ -12,6 +12,7 @@ const reveal = (correct: boolean): Reveal => ({
   lemma: null,
   alternatives: [],
   baseForm: false,
+  skipped: false,
 })
 
 describe('RevealPopup', () => {
@@ -26,6 +27,13 @@ describe('RevealPopup', () => {
     expect(w.get('[role="dialog"]').classes()).toContain('is-wrong')
     expect(w.text()).toContain('Not this one!')
     expect(w.text()).not.toContain('Correct!')
+  })
+  it('shows a skipped answer as the solution, not as a success', () => {
+    const w = mount(RevealPopup, { props: { reveal: { ...reveal(false), skipped: true } } })
+    expect(w.get('[role="dialog"]').classes()).toContain('is-skipped')
+    expect(w.text()).toContain('The answer was')
+    expect(w.text()).not.toContain('Correct!')
+    expect(w.text()).not.toContain('Not this one!')
   })
   it('falls back when there is no definition', () => {
     const w = mount(RevealPopup, { props: { reveal: { ...reveal(false), definition: null } } })

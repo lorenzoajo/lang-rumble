@@ -8,21 +8,27 @@ defineEmits<{ close: [] }>()
 const { t } = useI18n()
 
 const translations = computed(() => props.reveal.translations.join(', '))
+const variant = computed(() =>
+  props.reveal.skipped ? 'is-skipped' : props.reveal.correct ? 'is-correct' : 'is-wrong',
+)
+const title = computed(() =>
+  props.reveal.skipped
+    ? t('reveal.skipped')
+    : props.reveal.correct
+      ? t('reveal.correct')
+      : t('reveal.wrong'),
+)
+const icon = computed(() => (props.reveal.skipped ? '→' : props.reveal.correct ? '✓' : '✗'))
 </script>
 
 <template>
   <div class="overlay" @click.self="$emit('close')">
-    <div
-      role="dialog"
-      aria-modal="true"
-      class="popup"
-      :class="reveal.correct ? 'is-correct' : 'is-wrong'"
-    >
+    <div role="dialog" aria-modal="true" class="popup" :class="variant">
       <header class="popup__header">
-        <span class="popup__icon" aria-hidden="true">{{ reveal.correct ? '✓' : '✗' }}</span>
-        <h2>{{ reveal.correct ? t('reveal.correct') : t('reveal.wrong') }}</h2>
+        <span class="popup__icon" aria-hidden="true">{{ icon }}</span>
+        <h2>{{ title }}</h2>
       </header>
-      <p v-if="!reveal.correct" class="popup__hint">
+      <p v-if="!reveal.correct && !reveal.skipped" class="popup__hint">
         {{ reveal.baseForm ? t('reveal.baseForm') : t('reveal.wrongHint') }}
       </p>
 
@@ -74,6 +80,11 @@ const translations = computed(() => props.reveal.translations.join(', '))
   background: var(--surface);
   box-shadow: var(--shadow-soft);
   animation: rise var(--dur-med) var(--ease-bounce) both;
+}
+
+.popup.is-skipped {
+  --accent: var(--warn);
+  --accent-soft: var(--warn-soft);
 }
 
 .popup.is-wrong {

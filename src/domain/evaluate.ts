@@ -13,6 +13,8 @@ export interface Reveal {
   alternatives: string[]
   /** a wrong word that is the base form of the inflected phrase gap */
   baseForm: boolean
+  /** the solution shown after a skip */
+  skipped: boolean
 }
 
 export type Evaluation =
@@ -52,6 +54,7 @@ export function evaluate(raw: string, prompt: Prompt, pair: LoadedPair): Evaluat
         lemma,
         alternatives: prompt.accepted.filter((w) => w !== word),
         baseForm: false,
+        skipped: false,
         ...describe(word, side, pair, fallback),
       },
     }
@@ -66,6 +69,7 @@ export function evaluate(raw: string, prompt: Prompt, pair: LoadedPair): Evaluat
         lemma: null,
         alternatives: [],
         baseForm: prompt.mode === 'phrase-to-target' && word === entry.id,
+        skipped: false,
         ...describe(word, side, pair, []),
       },
     }

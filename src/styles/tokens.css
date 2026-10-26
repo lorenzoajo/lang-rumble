@@ -45,6 +45,7 @@
   --bad: #e11d48;
   --bad-soft: #ffe4e6;
   --warn: #f97316;
+  --warn-soft: #ffedd5;
   --overlay: rgba(30, 16, 60, 0.55);
 }
 
@@ -75,5 +76,6 @@
   --bad: #fb7185;
   --bad-soft: #3d1424;
   --warn: #fb923c;
+  --warn-soft: #3d2410;
   --overlay: rgba(5, 2, 15, 0.7);
 }
