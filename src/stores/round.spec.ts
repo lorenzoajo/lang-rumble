@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { isReactive } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import fixture from '@/test/fixtures/it-es.json'
 import dictEs from '@/test/fixtures/dict-es.json'
@@ -62,5 +63,13 @@ describe('round store lifecycle', () => {
     rounds.end()
     expect(ended).toHaveBeenCalledTimes(1)
     expect(useAppStore().state.progress['it-es']?.rounds).toBe(1)
+  })
+
+  it('does not deep-proxy the shared word data', async () => {
+    vi.spyOn(loader, 'loadPair').mockResolvedValue(loaded)
+    const rounds = useRoundStore()
+    await rounds.start('word-to-target', vi.fn())
+    const deps = (rounds.round as unknown as { deps: { pair: object } }).deps
+    expect(isReactive(deps.pair)).toBe(false)
   })
 })

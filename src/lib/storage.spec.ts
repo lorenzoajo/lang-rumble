@@ -56,3 +56,42 @@ describe('saveState', () => {
     expect(error).toHaveBeenCalled()
   })
 })
+
+describe('loadState field validation', () => {
+  it('resets when settings or progress are null', () => {
+    vi.spyOn(log, 'warn').mockImplementation(() => {})
+    const raw = JSON.stringify({ v: 1, settings: null, progress: null })
+    expect(loadState(memoryStorage({ [STORAGE_KEY]: raw }), ['en'])).toEqual(defaultState(['en']))
+  })
+  it('repairs settings fields with the wrong type', () => {
+    vi.spyOn(log, 'warn').mockImplementation(() => {})
+    const raw = JSON.stringify({
+      v: 1,
+      settings: { base: 'de', targets: 'es', activeTarget: 42, theme: 'neon', sound: 'yes' },
+      progress: {},
+    })
+    const s = loadState(memoryStorage({ [STORAGE_KEY]: raw }), ['it'])
+    expect(s.settings).toEqual(defaultState(['it']).settings)
+  })
+  it('keeps valid saved settings', () => {
+    const raw = JSON.stringify({
+      v: 1,
+      settings: {
+        base: 'en',
+        targets: ['es', 'xx'],
+        activeTarget: 'es',
+        theme: 'dark',
+        sound: false,
+      },
+      progress: {},
+    })
+    const s = loadState(memoryStorage({ [STORAGE_KEY]: raw }), ['it'])
+    expect(s.settings).toEqual({
+      base: 'en',
+      targets: ['es'],
+      activeTarget: 'es',
+      theme: 'dark',
+      sound: false,
+    })
+  })
+})

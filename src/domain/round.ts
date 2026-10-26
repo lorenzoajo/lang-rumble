@@ -1,4 +1,5 @@
 import type { LoadedPair } from '@/data/loader'
+import { log } from '@/lib/log'
 import type { PairProgress, WordStat } from '@/lib/storage'
 import { evaluate, type Evaluation, type Reveal } from './evaluate'
 import { generateGrid, graphemes, letterFrequencies, type Path } from './grid'
@@ -66,6 +67,8 @@ export class Round {
   private readonly touched = new Set<string>()
   private readonly awarded = new Set<string>()
   private readonly recent: string[] = []
+  /** entries whose grid could not be generated; never offered again this round */
+  private readonly broken = new Set<string>()
   private readonly decoyPool: string[]
   private readonly letterFreq: Record<string, number>
   private startedAt = 0
@@ -207,7 +210,11 @@ export class Round {
     const stats: PairProgress['words'] = {}
     for (const [id, stat] of Object.entries(this.stats)) if (stat) stats[id] = { [this.dir]: stat }
     const now = this.wallNow()
-    const exclude = new Set(this.recent.slice(-Math.min(RECENT_PROMPTS, this.pool.length - 1)))
+    const recentCount = Math.min(RECENT_PROMPTS, this.pool.length - this.broken.size - 1)
+    const exclude = new Set([
+      ...this.broken,
+      ...(recentCount > 0 ? this.recent.slice(-recentCount) : []),
+    ])
     const entry = pickNext(this.pool, stats, this.dir, now, this.deps.rng, exclude)
     if (!entry) {
       this.state.prompt = null
@@ -215,13 +222,20 @@ export class Round {
       return
     }
     const prompt = buildPrompt(entry, this.deps.mode)
-    const decoys = this.pickDecoys(prompt.accepted)
-    const grid = generateGrid(
-      prompt.accepted[0] ?? entry.id,
-      decoys,
-      this.letterFreq,
-      this.deps.rng,
-    )
+    let grid: ReturnType<typeof generateGrid>
+    try {
+      grid = generateGrid(
+        prompt.accepted[0] ?? entry.id,
+        this.pickDecoys(prompt.accepted),
+        this.letterFreq,
+        this.deps.rng,
+      )
+    } catch (err) {
+      log.error('skipping a word whose grid cannot be built', err, { id: entry.id })
+      this.broken.add(entry.id)
+      this.nextPrompt()
+      return
+    }
     this.recent.push(entry.id)
     this.state.prompt = prompt
     this.state.tiles = grid.tiles

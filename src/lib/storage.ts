@@ -1,5 +1,12 @@
 import { detectBaseLang } from '@/i18n'
-import type { BaseLang, Direction, LangCode, PairKey } from '@/domain/types'
+import {
+  BASE_LANGS,
+  TARGET_LANGS,
+  type BaseLang,
+  type Direction,
+  type LangCode,
+  type PairKey,
+} from '@/domain/types'
 import { log } from './log'
 
 export interface WordStat {
@@ -50,10 +57,30 @@ export function emptyProgress(): PairProgress {
   return { words: {}, points: 0, bestStreak: 0, rounds: 0 }
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
 function isSaveState(value: unknown): value is SaveState {
-  if (typeof value !== 'object' || value === null) return false
-  const v = value as Partial<SaveState>
-  return v.v === 1 && typeof v.settings === 'object' && typeof v.progress === 'object'
+  return isRecord(value) && value.v === 1 && isRecord(value.settings) && isRecord(value.progress)
+}
+
+const THEMES: readonly Settings['theme'][] = ['system', 'light', 'dark']
+
+/** Keeps each saved setting only if it has a valid value; anything else falls back to the default. */
+function sanitizeSettings(raw: Record<string, unknown>, fallback: Settings): Settings {
+  const base = BASE_LANGS.find((b) => b === raw.base) ?? fallback.base
+  const targets = Array.isArray(raw.targets)
+    ? TARGET_LANGS.filter((t) => t !== base && (raw.targets as unknown[]).includes(t))
+    : fallback.targets
+  const active = TARGET_LANGS.find((t) => t === raw.activeTarget)
+  return {
+    base,
+    targets,
+    activeTarget: active && targets.includes(active) ? active : null,
+    theme: THEMES.find((t) => t === raw.theme) ?? fallback.theme,
+    sound: typeof raw.sound === 'boolean' ? raw.sound : fallback.sound,
+  }
 }
 
 export function loadState(storage: Storage | null, languages: readonly string[]): SaveState {
@@ -73,7 +100,14 @@ export function loadState(storage: Storage | null, languages: readonly string[])
       log.warn('saved state has an unknown shape, resetting')
       return fallback
     }
-    return { ...parsed, settings: { ...fallback.settings, ...parsed.settings } }
+    return {
+      v: 1,
+      settings: sanitizeSettings(
+        parsed.settings as unknown as Record<string, unknown>,
+        fallback.settings,
+      ),
+      progress: parsed.progress,
+    }
   } catch (err) {
     log.warn('saved state is corrupt, resetting', { err: String(err) })
     return fallback

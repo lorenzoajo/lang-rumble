@@ -1,4 +1,4 @@
-import { reactive, ref, shallowRef } from 'vue'
+import { markRaw, reactive, ref, shallowRef } from 'vue'
 import { defineStore } from 'pinia'
 import { loadPair } from '@/data/loader'
 import type { Reveal } from '@/domain/evaluate'
@@ -63,7 +63,8 @@ export const useRoundStore = defineStore('round', () => {
       if (token !== generation) return
       const r = reactive(
         new Round({
-          pair: loaded,
+          // The word data is read-only and large; keep it out of Vue's reactivity.
+          pair: markRaw(loaded),
           mode: m,
           progress: app.state.progress[app.activePair] ?? emptyProgress(),
           now: () => performance.now(),

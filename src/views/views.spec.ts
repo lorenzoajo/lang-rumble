@@ -36,6 +36,27 @@ describe('router guard', () => {
   })
 })
 
+describe('play route guard', () => {
+  it('sends an unavailable mode back to the menu', async () => {
+    const manifest: Manifest = {
+      v: 1,
+      pairs: { 'it-es': { words: 2000, phrasesTarget: 0, phrasesBase: 0 } },
+    }
+    vi.spyOn(loader, 'loadManifest').mockResolvedValue(manifest)
+    useAppStore().setActiveTarget('es')
+    const router = createAppRouter(createMemoryHistory())
+    await router.push('/play/phrase-to-target')
+    expect(router.currentRoute.value.name).toBe('menu')
+  })
+  it('sends an unknown mode back to the menu', async () => {
+    vi.spyOn(loader, 'loadManifest').mockResolvedValue({ v: 1, pairs: {} })
+    useAppStore().setActiveTarget('es')
+    const router = createAppRouter(createMemoryHistory())
+    await router.push('/play/nonsense')
+    expect(router.currentRoute.value.name).toBe('menu')
+  })
+})
+
 describe('SettingsView', () => {
   it('does not offer the base language as a target', async () => {
     const router = createAppRouter(createMemoryHistory())

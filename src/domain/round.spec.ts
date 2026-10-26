@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { log } from '@/lib/log'
 import fixture from '@/test/fixtures/it-es.json'
 import dictEs from '@/test/fixtures/dict-es.json'
 import dictIt from '@/test/fixtures/dict-it.json'
@@ -104,6 +105,25 @@ describe('Round wall clock', () => {
     round.submit(round.state.prompt!.accepted[0]!)
     round.applyTo(progress)
     expect(progress.words[id]?.production?.lastSeen).toBe(1_700_000_000_000)
+  })
+})
+
+describe('Round edge cases', () => {
+  it('keeps playing a single-word pool', () => {
+    const one: LoadedPair = { ...pair, data: { ...data, deck: data.deck.slice(0, 1) } }
+    const { round } = setup('word-to-target', emptyProgress(), one)
+    round.submit(round.state.prompt!.accepted[0]!)
+    round.next()
+    expect(round.state.over).toBe(false)
+    expect(round.state.prompt?.entry.id).toBe('casa')
+  })
+  it('skips an entry whose grid cannot be built instead of stalling', () => {
+    const huge = { id: 'x', rank: 0, target: ['abcdefghijklmnopq'], base: ['y'] }
+    const broken: LoadedPair = { ...pair, data: { ...data, deck: [huge, ...data.deck] } }
+    vi.spyOn(log, 'error').mockImplementation(() => {})
+    const { round } = setup('word-to-target', emptyProgress(), broken)
+    expect(round.state.prompt?.entry.id).not.toBe('x')
+    expect(round.state.over).toBe(false)
   })
 })
 
