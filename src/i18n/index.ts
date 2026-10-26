@@ -10,7 +10,7 @@ const names: Record<BaseLang, Record<LangCode, string>> = {
 }
 
 // Holder ref so components that called useI18n() before the store bound a source still react.
-const current = shallowRef<Ref<BaseLang>>(ref('en'))
+const current = shallowRef<{ src: Ref<BaseLang> }>({ src: ref('en') })
 
 export function detectBaseLang(languages: readonly string[]): BaseLang {
   for (const tag of languages) {
@@ -22,7 +22,7 @@ export function detectBaseLang(languages: readonly string[]): BaseLang {
 
 /** Binds the UI language to a reactive source (the settings store). */
 export function provideLang(source: Ref<BaseLang>): void {
-  current.value = source
+  current.value = { src: source }
 }
 
 export function langName(code: LangCode, inLang: BaseLang): string {
@@ -45,7 +45,7 @@ export function useI18n(): {
   t: (key: MessageKey, params?: Record<string, string | number>) => string
   lang: ComputedRef<BaseLang>
 } {
-  const lang = computed(() => current.value.value)
+  const lang = computed(() => current.value.src.value)
   return { t: (key, params) => translate(lang.value, key, params), lang }
 }
 
