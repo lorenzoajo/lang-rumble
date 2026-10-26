@@ -2,6 +2,8 @@ import { computed, reactive, toRef, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { provideLang } from '@/i18n'
 import { log } from '@/lib/log'
+import { sfx } from '@/lib/sfx'
+import { applyTheme, watchSystemTheme } from '@/lib/theme'
 import {
   browserStorage,
   emptyProgress,
@@ -34,6 +36,20 @@ export const useAppStore = defineStore('app', () => {
     },
     { deep: true },
   )
+  watch(
+    () => state.settings.theme,
+    (theme) => {
+      if (globalThis.document) applyTheme(theme)
+    },
+    { immediate: true },
+  )
+  watchSystemTheme(() => state.settings.theme)
+  watch(
+    () => state.settings.sound,
+    (on) => sfx.setEnabled(on),
+    { immediate: true },
+  )
+
   globalThis.document?.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && timer !== undefined) flush()
   })

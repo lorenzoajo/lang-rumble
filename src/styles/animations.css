@@ -1,0 +1,96 @@
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(0) scale(1.08);
+  }
+  25% {
+    transform: rotate(-6deg) scale(1.12);
+  }
+  75% {
+    transform: rotate(6deg) scale(1.12);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-8px);
+  }
+  40%,
+  80% {
+    transform: translateX(8px);
+  }
+}
+
+/* Slot-machine reel: tiles drop in from above with an overshoot */
+@keyframes roll-in {
+  0% {
+    transform: translateY(-140%);
+    opacity: 0;
+    filter: blur(3px);
+  }
+  70% {
+    transform: translateY(8%);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(24px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}

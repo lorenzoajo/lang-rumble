@@ -1,0 +1,79 @@
+/* Design tokens. Components must only use these variables, so a theme is a block of overrides. */
+:root {
+  --font: ui-rounded, 'SF Pro Rounded', 'Nunito', 'Varela Round', system-ui, sans-serif;
+  --radius-s: 10px;
+  --radius-m: 18px;
+  --radius-l: 28px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --tap: 52px;
+  --dur-fast: 120ms;
+  --dur-med: 260ms;
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --max-width: 520px;
+}
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #fff4e6;
+  --bg-glow: radial-gradient(120% 80% at 50% -10%, #ffd6f0 0%, #fff4e6 55%);
+  --surface: #ffffff;
+  --surface-2: #fdebd6;
+  --text: #2a1a4a;
+  --text-muted: #7b6a94;
+  --primary: #7c3aed;
+  --primary-ink: #ffffff;
+  --shadow: 0 6px 0 rgba(42, 26, 74, 0.18);
+  --shadow-soft: 0 10px 30px rgba(42, 26, 74, 0.12);
+  --tile-bg: #ffffff;
+  --tile-ink: #2a1a4a;
+  --tile-edge: #e6cfb0;
+  --tile-active: #ffcc33;
+  --tile-active-ink: #2a1a4a;
+  --trace: rgba(124, 58, 237, 0.55);
+  --mode-1: #ff5d73;
+  --mode-2: #2fa8ff;
+  --mode-3: #ffaa1d;
+  --mode-4: #20c997;
+  --ok: #16a34a;
+  --ok-soft: #dcfce7;
+  --bad: #e11d48;
+  --bad-soft: #ffe4e6;
+  --warn: #f97316;
+  --overlay: rgba(30, 16, 60, 0.55);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #150e2b;
+  --bg-glow: radial-gradient(120% 80% at 50% -10%, #3b1d6e 0%, #150e2b 60%);
+  --surface: #231a45;
+  --surface-2: #2e2358;
+  --text: #f6f0ff;
+  --text-muted: #b2a4d4;
+  --primary: #a78bfa;
+  --primary-ink: #150e2b;
+  --shadow: 0 6px 0 rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --tile-bg: #33275f;
+  --tile-ink: #fdf8ff;
+  --tile-edge: #1b1238;
+  --tile-active: #ffcc33;
+  --tile-active-ink: #1b1238;
+  --trace: rgba(255, 204, 51, 0.6);
+  --mode-1: #ff6b81;
+  --mode-2: #3db4ff;
+  --mode-3: #ffb52e;
+  --mode-4: #2fd8a5;
+  --ok: #22c55e;
+  --ok-soft: #12351f;
+  --bad: #fb7185;
+  --bad-soft: #3d1424;
+  --warn: #fb923c;
+  --overlay: rgba(5, 2, 15, 0.7);
+}
